@@ -2,28 +2,29 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Leitor de NF-e XML</title>
+    <title>Leitor NF-e XML</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>Importar NF-e (XML)</h1>
+
+    <h1>Importação de NF-e (XML)</h1>
 
     <div class="top-bar">
-    <input type="file" id="fileInput" accept=".xml">
+        <input type="file" id="fileInput" accept=".xml">
 
-    <button onclick="lerXML()">Ler XML</button>
+        <button onclick="lerXML()">Ler XML</button>
 
-    <select id="regime">
-        <option value="">Regime</option>
-        <option value="simples">Simples Nacional</option>
-        <option value="lucro">Lucro Presumido/Real</option>
-    </select>
-</div>
-
+        <select id="regime">
+            <option value="">Selecione o Regime</option>
+            <option value="simples">Simples Nacional</option>
+            <option value="lucro">Lucro Presumido/Real</option>
+        </select>
+    </div>
 
     <div id="resultado" class="hidden">
+
         <h2>Dados da Nota</h2>
 
         <p><strong>Chave:</strong> <span id="chave"></span></p>
@@ -32,64 +33,70 @@
 
         <h3>Produtos</h3>
 
-		<table>
-			<thead>
-				<tr>
-					<th>Produto</th>
-					<th>CFOP</th>
-					<th>CST ICMS</th>
-					<th>Alíquota ICMS</th>
-					<th>Base ICMS</th>
-					<th>Valor ICMS</th>
-					<th>CST PIS</th>
-					<th>Alíquota PIS</th>
-					<th>Base PIS</th>
-					<th>Valor PIS</th>
-					<th>CST COFINS</th>
-					<th>Alíquota COFINS</th>
-					<th>Base COFINS</th>
-					<th>Valor COFINS</th>
-					<th>CST IPI</th>
-					<th>Alíquota IPI</th>
-					<th>Base IPI</th>
-					<th>Valor IPI</th>
-					<th>Valor Produto</th>
-				</tr>
-			</thead>
-			<tbody id="produtos"></tbody>
-		</table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>CFOP</th>
+
+                        <th>CST ICMS</th>
+                        <th>Alíquota ICMS</th>
+                        <th>Valor ICMS</th>
+
+                        <th>CST PIS</th>
+                        <th>Alíquota PIS</th>
+                        <th>Valor PIS</th>
+
+                        <th>CST COFINS</th>
+                        <th>Alíquota COFINS</th>
+                        <th>Valor COFINS</th>
+
+                        <th>CST IPI</th>
+                        <th>Alíquota IPI</th>
+                        <th>Valor IPI</th>
+
+                        <th>Valor Produto</th>
+                    </tr>
+                </thead>
+                <tbody id="produtos"></tbody>
+            </table>
+        </div>
 
         <button onclick="gerarDevolucao()">Gerar Devolução</button>
     </div>
 
     <div id="devolucao" class="hidden">
+
         <h2>Devolução (Sugestão)</h2>
 
-	<table>
-		<thead>
-			<tr>
-				<th>Produto</th>
-				<th>CFOP Saída</th>
-				<th>CST ICMS</th>
-				<th>Alíquota ICMS</th>
-				<th>Base ICMS</th>
-				<th>Valor ICMS</th>
-				<th>CST PIS</th>
-				<th>Alíquota PIS</th>
-				<th>Base PIS</th>
-				<th>Valor PIS</th>
-				<th>CST COFINS</th>
-				<th>Alíquota COFINS</th>
-				<th>Base COFINS</th>
-				<th>Valor COFINS</th>
-				<th>CST IPI</th>
-				<th>Alíquota IPI</th>
-				<th>Base IPI</th>
-				<th>Valor IPI</th>
-			</tr>
-		</thead>
-		<tbody id="tabelaDevolucao"></tbody>
-	</table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>CFOP Saída</th>
+
+                        <th>CST ICMS</th>
+                        <th>Alíquota ICMS</th>
+                        <th>Valor ICMS</th>
+
+                        <th>CST PIS</th>
+                        <th>Alíquota PIS</th>
+                        <th>Valor PIS</th>
+
+                        <th>CST COFINS</th>
+                        <th>Alíquota COFINS</th>
+                        <th>Valor COFINS</th>
+
+                        <th>CST IPI</th>
+                        <th>Alíquota IPI</th>
+                        <th>Valor IPI</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaDevolucao"></tbody>
+            </table>
+        </div>
 
     </div>
 

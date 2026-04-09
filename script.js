@@ -1,6 +1,5 @@
 let itensNota = [];
 
-// ================= UTIL =================
 function getTagText(node, tag) {
     return node?.getElementsByTagName(tag)[0]?.textContent || "";
 }
@@ -18,7 +17,6 @@ function extrairICMS(imposto) {
     return {
         cst: getTagText(icmsChild, "CST") || getTagText(icmsChild, "CSOSN"),
         aliquota: getTagText(icmsChild, "pICMS"),
-        base: getTagText(icmsChild, "vBC"),
         valor: getTagText(icmsChild, "vICMS")
     };
 }
@@ -29,7 +27,6 @@ function extrairPIS(pisNode) {
     return {
         cst: getTagText(child, "CST"),
         aliquota: getTagText(child, "pPIS"),
-        base: getTagText(child, "vBC"),
         valor: getTagText(child, "vPIS")
     };
 }
@@ -40,7 +37,6 @@ function extrairCOFINS(cofNode) {
     return {
         cst: getTagText(child, "CST"),
         aliquota: getTagText(child, "pCOFINS"),
-        base: getTagText(child, "vBC"),
         valor: getTagText(child, "vCOFINS")
     };
 }
@@ -51,7 +47,6 @@ function extrairIPI(ipiNode) {
     return {
         cst: getTagText(child, "CST"),
         aliquota: getTagText(child, "pIPI"),
-        base: getTagText(child, "vBC"),
         valor: getTagText(child, "vIPI")
     };
 }
@@ -59,9 +54,10 @@ function extrairIPI(ipiNode) {
 // ================= LEITURA XML =================
 function lerXML() {
     const file = document.getElementById("fileInput").files[0];
-    if (!file) { alert("Selecione um XML"); return; }
+    if (!file) return alert("Selecione um XML");
 
     const reader = new FileReader();
+
     reader.onload = function(e) {
         const parser = new DOMParser();
         const xml = parser.parseFromString(e.target.result, "text/xml");
@@ -86,42 +82,40 @@ function lerXML() {
             const prod = det.getElementsByTagName("prod")[0];
             const imposto = det.getElementsByTagName("imposto")[0];
 
-            const descricao = getTagText(prod, "xProd");
-            const cfop = getTagText(prod, "CFOP");
-            const valor = getTagText(prod, "vProd");
+            const item = {
+                descricao: getTagText(prod, "xProd"),
+                cfop: getTagText(prod, "CFOP"),
+                valor: getTagText(prod, "vProd"),
+                icms: extrairICMS(imposto),
+                pis: extrairPIS(imposto.getElementsByTagName("PIS")[0]),
+                cofins: extrairCOFINS(imposto.getElementsByTagName("COFINS")[0]),
+                ipi: extrairIPI(imposto.getElementsByTagName("IPI")[0])
+            };
 
-            const icms = extrairICMS(imposto);
-            const pis = extrairPIS(imposto.getElementsByTagName("PIS")[0]);
-            const cofins = extrairCOFINS(imposto.getElementsByTagName("COFINS")[0]);
-            const ipi = extrairIPI(imposto.getElementsByTagName("IPI")[0]);
-
-            itensNota.push({ descricao, cfop, valor, icms, pis, cofins, ipi });
+            itensNota.push(item);
 
             tabela.innerHTML += `
                 <tr>
-                    <td>${descricao}</td>
-                    <td>${formatarCFOP(cfop)}</td>
-                    <td>${icms.cst || "-"}</td>
-                    <td>${icms.aliquota || "0"}%</td>
-                    <td>${icms.base || "0"}</td>
-                    <td>${icms.valor || "0"}</td>
+                    <td>${item.descricao}</td>
+                    <td>${formatarCFOP(item.cfop)}</td>
 
-                    <td>${pis.cst || "-"}</td>
-                    <td>${pis.aliquota || "0"}%</td>
-                    <td>${pis.base || "0"}</td>
-                    <td>${pis.valor || "0"}</td>
+                    <td>${item.icms.cst || "-"}</td>
+                    <td>${item.icms.aliquota || "0"}%</td>
+                    <td>${item.icms.valor || "0"}</td>
 
-                    <td>${cofins.cst || "-"}</td>
-                    <td>${cofins.aliquota || "0"}%</td>
-                    <td>${cofins.base || "0"}</td>
-                    <td>${cofins.valor || "0"}</td>
+                    <td>${item.pis.cst || "-"}</td>
+                    <td>${item.pis.aliquota || "0"}%</td>
+                    <td>${item.pis.valor || "0"}</td>
 
-                    <td>${ipi.cst || "-"}</td>
-                    <td>${ipi.aliquota || "0"}%</td>
-                    <td>${ipi.base || "0"}</td>
-                    <td>${ipi.valor || "0"}</td>
+                    <td>${item.cofins.cst || "-"}</td>
+                    <td>${item.cofins.aliquota || "0"}%</td>
+                    <td>${item.cofins.valor || "0"}</td>
 
-                    <td>${valor}</td>
+                    <td>${item.ipi.cst || "-"}</td>
+                    <td>${item.ipi.aliquota || "0"}%</td>
+                    <td>${item.ipi.valor || "0"}</td>
+
+                    <td>${item.valor}</td>
                 </tr>
             `;
         }
@@ -132,54 +126,31 @@ function lerXML() {
     reader.readAsText(file);
 }
 
-// ================= CONVERSÃO COM REGRAS =================
+// ================= DEVOLUÇÃO =================
 function gerarDevolucao() {
     const regime = document.getElementById("regime").value;
-    if (!regime) { alert("Selecione o regime tributário antes de gerar a devolução."); return; }
+    if (!regime) return alert("Selecione o regime tributário");
 
     const tabela = document.getElementById("tabelaDevolucao");
     tabela.innerHTML = "";
 
     itensNota.forEach(item => {
-        let cfopSaida = item.cfop.startsWith("1") ? "1202" : "2202";
 
-        // ===== ICMS =====
-        let cstICMS = (regime === "simples") ? "900" : (item.icms.cst || "-");
-        let aliqICMS = item.icms.aliquota || "0";
-        let baseICMS = item.icms.base || "0";
-        let valorICMS = item.icms.valor || "0";
+        const cfopSaida = item.cfop.startsWith("1") ? "1202" : "2202";
 
-        // ===== PIS =====
-        let cstPIS;
-        if (regime === "simples") {
-            cstPIS = "49";
-        } else {
-            cstPIS = (parseFloat(item.pis.valor) > 0 && parseFloat(item.pis.aliquota) > 0)
+        const cstICMS = (regime === "simples") ? "900" : (item.icms.cst || "-");
+
+        const cstPIS = (regime === "simples")
+            ? "49"
+            : ((parseFloat(item.pis.valor) > 0 && parseFloat(item.pis.aliquota) > 0)
                 ? item.pis.cst || "01"
-                : "49";
-        }
-        let aliqPIS = item.pis.aliquota || "0";
-        let basePIS = item.pis.base || "0";
-        let valorPIS = item.pis.valor || "0";
+                : "49");
 
-        // ===== COFINS =====
-        let cstCOFINS;
-        if (regime === "simples") {
-            cstCOFINS = "49";
-        } else {
-            cstCOFINS = (parseFloat(item.cofins.valor) > 0 && parseFloat(item.cofins.aliquota) > 0)
+        const cstCOFINS = (regime === "simples")
+            ? "49"
+            : ((parseFloat(item.cofins.valor) > 0 && parseFloat(item.cofins.aliquota) > 0)
                 ? item.cofins.cst || "01"
-                : "49";
-        }
-        let aliqCOFINS = item.cofins.aliquota || "0";
-        let baseCOFINS = item.cofins.base || "0";
-        let valorCOFINS = item.cofins.valor || "0";
-
-        // ===== IPI =====
-        let cstIPI = item.ipi.cst || "-";
-        let aliqIPI = item.ipi.aliquota || "0";
-        let baseIPI = item.ipi.base || "0";
-        let valorIPI = item.ipi.valor || "0";
+                : "49");
 
         tabela.innerHTML += `
             <tr>
@@ -187,24 +158,20 @@ function gerarDevolucao() {
                 <td>${formatarCFOP(cfopSaida)}</td>
 
                 <td>${cstICMS}</td>
-                <td>${aliqICMS}%</td>
-                <td>${baseICMS}</td>
-                <td>${valorICMS}</td>
+                <td>${item.icms.aliquota || "0"}%</td>
+                <td>${item.icms.valor || "0"}</td>
 
                 <td>${cstPIS}</td>
-                <td>${aliqPIS}%</td>
-                <td>${basePIS}</td>
-                <td>${valorPIS}</td>
+                <td>${item.pis.aliquota || "0"}%</td>
+                <td>${item.pis.valor || "0"}</td>
 
                 <td>${cstCOFINS}</td>
-                <td>${aliqCOFINS}%</td>
-                <td>${baseCOFINS}</td>
-                <td>${valorCOFINS}</td>
+                <td>${item.cofins.aliquota || "0"}%</td>
+                <td>${item.cofins.valor || "0"}</td>
 
-                <td>${cstIPI}</td>
-                <td>${aliqIPI}%</td>
-                <td>${baseIPI}</td>
-                <td>${valorIPI}</td>
+                <td>${item.ipi.cst || "-"}</td>
+                <td>${item.ipi.aliquota || "0"}%</td>
+                <td>${item.ipi.valor || "0"}</td>
             </tr>
         `;
     });

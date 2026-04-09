@@ -1,20 +1,29 @@
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #f4f6f8;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
-    width: 95%;
-    max-width: 1000px;
-    margin: 30px auto;
+    width: 98%;
+    max-width: 1700px;
+    margin: 20px auto;
     background: #fff;
     padding: 20px;
     border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.top-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
 button {
-    margin-top: 10px;
-    padding: 10px;
+    padding: 10px 15px;
     background: #007bff;
     color: white;
     border: none;
@@ -25,29 +34,34 @@ button:hover {
     background: #0056b3;
 }
 
+select, input {
+    padding: 8px;
+}
+
 .hidden {
     display: none;
 }
 
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
 table {
     width: 100%;
-    margin-top: 15px;
     border-collapse: collapse;
+    font-size: 13px;
 }
 
 th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 6px 10px;
+    white-space: nowrap;
 }
 
 th {
     background: #007bff;
     color: white;
-}
-
-.top-bar {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 15px;
+    position: sticky;
+    top: 0;
 }
